@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}My Submissions{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>My Submission History</h2>
+</div>
+
+{% set correct = submissions | selectattr('is_correct', 'equalto', 1) | list %}
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number">{{ submissions|length }}</div><div class="stat-label">Total Submissions</div></div>
+  <div class="stat-card stat-green"><div class="stat-number">{{ correct|length }}</div><div class="stat-label">Correct</div></div>
+  <div class="stat-card"><div class="stat-number">{{ correct | sum(attribute='score_awarded') }}</div><div class="stat-label">Total Points</div></div>
+</div>
+
+<div class="table-wrap">
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Event</th>
+      <th>Team</th>
+      <th>Result</th>
+      <th>Points</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for s in submissions %}
+    <tr class="{% if s.is_correct %}row-correct{% else %}row-wrong{% endif %}">
+      <td>{{ s.problem_title }}</td>
+      <td>{{ s.event_name }}</td>
+      <td>{{ s.team_name }}</td>
+      <td>{% if s.is_correct %}<span class="badge badge-success">CORRECT</span>{% else %}<span class="badge badge-danger">WRONG</span>{% endif %}</td>
+      <td>{{ s.score_awarded }}</td>
+      <td>{{ s.submitted_at.strftime('%d %b, %H:%M') }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="empty-state">No submissions yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

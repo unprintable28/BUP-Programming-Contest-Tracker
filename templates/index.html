@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUP Programming Contest Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="landing-body">
+
+  <nav class="landing-navbar">
+    <div class="landing-brand">
+      <img src="{{ url_for('static', filename='img/bup-logo.png') }}" alt="BUP Logo">
+      <div>
+        <h3>Bangladesh University</h3>
+        <p>of Professionals</p>
+      </div>
+    </div>
+
+    <div class="landing-nav-links">
+      <a href="{{ url_for('index') }}" class="active">Home</a>
+      <a href="{{ url_for('login') }}">Contests</a>
+      <a href="{{ url_for('login') }}">Leaderboard</a>
+      <a href="{{ url_for('login') }}">Teams</a>
+      <a href="{{ url_for('login') }}">Submissions</a>
+    </div>
+
+    <div class="landing-nav-action">
+      {% if session.user_id %}
+        <a href="{{ url_for('dashboard') }}" class="landing-login-btn">Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="landing-login-btn">Login</a>
+      {% endif %}
+    </div>
+  </nav>
+
+
+  <main class="landing-wrapper">
+
+    <section class="landing-hero">
+
+      <div class="hero-left">
+
+        <img src="{{ url_for('static', filename='img/bup-logo.png') }}" alt="BUP Logo" class="hero-bup-logo">
+
+        <div class="hero-text">
+          <h1>
+            <span>BUP</span> Programming <br>
+            Contest Tracker
+          </h1>
+
+          <p class="hero-subtitle">
+            Programming Contest Registration & Score Tracker
+          </p>
+
+          <div class="hero-badge">
+            CSE 3102 DBMS Lab
+          </div>
+
+          <div class="hero-buttons">
+            {% if session.user_id %}
+              <a href="{{ url_for('participant_events') if session.role == 'participant' else url_for('dashboard') }}" class="hero-primary-btn">
+                🚀 Explore Contests
+              </a>
+              <a href="{{ url_for('leaderboard') }}" class="hero-secondary-btn">
+                🏆 View Leaderboard
+              </a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="hero-primary-btn">
+                🚀 Explore Contests
+              </a>
+              <a href="{{ url_for('register') }}" class="hero-secondary-btn">
+                👥 Register Now
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="hero-right">
+
+        <div class="code-laptop-card">
+          <div class="laptop-top">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <div class="code-lines">
+            <div class="line long"></div>
+            <div class="line medium"></div>
+            <div class="line short"></div>
+            <div class="line long purple"></div>
+            <div class="line medium green"></div>
+            <div class="line short orange"></div>
+            <div class="line long"></div>
+          </div>
+
+          <div class="code-symbol">&lt;/&gt;</div>
+        </div>
+
+        <div class="floating-chart">
+          <div class="chart-bars">
+            <span style="height: 30%;"></span>
+            <span style="height: 55%;"></span>
+            <span style="height: 42%;"></span>
+            <span style="height: 75%;"></span>
+            <span style="height: 90%;"></span>
+          </div>
+          <p>Live Score</p>
+        </div>
+
+        <div class="floating-trophy">
+          🏆
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="landing-feature-strip">
+
+      <div class="strip-item">
+        <div class="strip-icon purple">🏆</div>
+        <div>
+          <h4>Track Performance</h4>
+          <p>In real time</p>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon green">👥</div>
+        <div>
+          <h4>Compete & Collaborate</h4>
+          <p>With teams</p>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon orange">📊</div>
+        <div>
+          <h4>Climb the Leaderboard</h4>
+          <p>Be the best</p>
+        </div>
+      </div>
+
+      <div class="strip-item">
+        <div class="strip-icon blue">💻</div>
+        <div>
+          <h4>Submit & Improve</h4>
+          <p>Sharpen your skills</p>
+        </div>
+      </div>
+
+    </section>
+
+
+    <section class="landing-card-grid">
+
+      <div class="landing-feature-card">
+        <div class="feature-card-icon purple">🗓️</div>
+        <h3>Contests</h3>
+        <p>Discover upcoming contests, register, and participate to challenge yourself.</p>
+        <a href="{{ url_for('login') }}">Browse Contests →</a>
+      </div>
+
+      <div class="landing-feature-card">
+        <div class="feature-card-icon green">📈</div>
+        <h3>Leaderboard</h3>
+        <p>View real-time rankings and see how you stand among the top performers.</p>
+        <a href="{{ url_for('login') }}">View Leaderboard →</a>
+      </div>
+
+      <div class="landing-feature-card">
+        <div class="feature-card-icon orange">👥</div>
+        <h3>Teams</h3>
+        <p>Create or join teams, collaborate with teammates, and achieve together.</p>
+        <a href="{{ url_for('login') }}">Explore Teams →</a>
+      </div>
+
+      <div class="landing-feature-card">
+        <div class="feature-card-icon blue">💻</div>
+        <h3>Submissions</h3>
+        <p>Submit your solutions and track your progress across programming contests.</p>
+        <a href="{{ url_for('login') }}">View Submissions →</a>
+      </div>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

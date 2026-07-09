@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+  <div class="profile-topbar">
+    <div>
+      <h2>My Profile</h2>
+      <p>Track your contest registration, team activity, and submission performance.</p>
+    </div>
+
+    <a href="{{ url_for('participant_dashboard') }}" class="btn btn-sm btn-outline">
+      Back to Dashboard
+    </a>
+  </div>
+
+  {% set success_rate = ((correct_submissions / total_submissions) * 100)|round(0) if total_submissions > 0 else 0 %}
+
+  <div class="premium-profile-hero">
+
+<div class="profile-photo-wrapper">
+
+  {% if user.profile_image %}
+    <img
+      src="{{ url_for('static', filename=user.profile_image) }}"
+      alt="Profile Picture"
+      class="profile-photo-img"
+    >
+  {% else %}
+    <div class="profile-avatar-big">
+      {{ user.name[0]|upper }}
+    </div>
+  {% endif %}
+
+  <form
+    action="{{ url_for('upload_profile_photo') }}"
+    method="POST"
+    enctype="multipart/form-data"
+    class="profile-photo-form"
+  >
+    <label for="profile_photo" class="profile-upload-btn">
+      📷
+    </label>
+
+    <input
+      type="file"
+      name="profile_photo"
+      id="profile_photo"
+      accept=".jpg,.jpeg,.png,.webp"
+      onchange="this.form.submit()"
+      hidden
+    >
+  </form>
+
+</div>
+
+    <div class="profile-main-info">
+      <span class="profile-role-badge">{{ user.role|upper }}</span>
+      <h1>{{ user.name }}</h1>
+      <p>{{ user.email }}</p>
+
+      <div class="profile-mini-info">
+        <span>🎓 {{ user.department }}</span>
+        <span>📅 Joined: {{ user.created_at.strftime('%d %b %Y') if user.created_at else 'N/A' }}</span>
+      </div>
+    </div>
+
+    <div class="profile-score-box">
+      <span>Total Points</span>
+      <strong>{{ total_points }}</strong>
+    </div>
+
+  </div>
+
+
+  <div class="profile-stat-grid">
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">📌</div>
+      <div>
+        <h3>{{ registered_events }}</h3>
+        <p>Registered Events</p>
+      </div>
+    </div>
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">👥</div>
+      <div>
+        <h3>{{ total_teams }}</h3>
+        <p>Teams</p>
+      </div>
+    </div>
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">📤</div>
+      <div>
+        <h3>{{ total_submissions }}</h3>
+        <p>Total Submissions</p>
+      </div>
+    </div>
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">✅</div>
+      <div>
+        <h3>{{ correct_submissions }}</h3>
+        <p>Correct Submissions</p>
+      </div>
+    </div>
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">❌</div>
+      <div>
+        <h3>{{ wrong_submissions }}</h3>
+        <p>Wrong Submissions</p>
+      </div>
+    </div>
+
+    <div class="premium-stat-card">
+      <div class="stat-icon">🏆</div>
+      <div>
+        <h3>{{ total_points }}</h3>
+        <p>Total Points</p>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="performance-card">
+    <div class="performance-header">
+      <div>
+        <h3>Submission Performance</h3>
+        <p>Your correct submission ratio based on total attempts.</p>
+      </div>
+
+      <div class="success-rate-number">
+        {{ success_rate }}%
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" style="width: {{ success_rate }}%;"></div>
+    </div>
+
+    <div class="performance-summary">
+      <span>Correct: {{ correct_submissions }}</span>
+      <span>Wrong: {{ wrong_submissions }}</span>
+      <span>Total: {{ total_submissions }}</span>
+    </div>
+  </div>
+
+
+  <div class="profile-content-grid">
+
+    <div class="premium-panel">
+      <div class="panel-header">
+        <h3>My Teams</h3>
+        <span>{{ total_teams }} Teams</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              <th>Event</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for team in my_teams %}
+            <tr>
+              <td>
+                <strong>{{ team.team_name }}</strong>
+              </td>
+              <td>{{ team.event_name }}</td>
+              <td>
+                <span class="event-status-badge">{{ team.status|upper }}</span>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-muted" style="text-align:center;">
+                You have not joined any team yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="premium-panel">
+      <div class="panel-header">
+        <h3>Recent Submissions</h3>
+        <span>Last 10</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Event</th>
+              <th>Result</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for sub in recent_submissions %}
+            <tr>
+              <td><strong>{{ sub.problem_title }}</strong></td>
+              <td>{{ sub.event_name }}</td>
+              <td>
+                {% if sub.is_correct %}
+                  <span class="result-badge correct">Correct</span>
+                {% else %}
+                  <span class="result-badge wrong">Wrong</span>
+                {% endif %}
+              </td>
+              <td>{{ sub.score_awarded }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-muted" style="text-align:center;">
+                No submissions found.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

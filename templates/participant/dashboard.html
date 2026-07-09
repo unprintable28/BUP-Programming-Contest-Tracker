@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Participant Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Welcome back, {{ session.get('name') }}!</h2>
+  <p class="text-muted">Track your contest participation, teams, submissions, and scores.</p>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number">{{ total_events }}</div>
+    <div class="stat-label">Total Events</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ registered_events }}</div>
+    <div class="stat-label">Registered Events</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">{{ my_teams_count }}</div>
+    <div class="stat-label">My Teams</div>
+  </div>
+
+  <div class="stat-card stat-green">
+    <div class="stat-number">{{ submissions_count }}</div>
+    <div class="stat-label">My Submissions</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ correct_count }}</div>
+    <div class="stat-label">Correct</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">{{ total_points }}</div>
+    <div class="stat-label">Total Points</div>
+  </div>
+</div>
+
+<div class="quick-actions">
+  <h3 class="section-title">Quick Actions</h3>
+
+  <div class="action-grid">
+
+    <a href="{{ url_for('participant_events') }}" class="action-card">
+      <div class="action-icon">🗓️</div>
+      <div class="action-label">Browse Events</div>
+    </a>
+
+    <a href="{{ url_for('create_team') }}" class="action-card">
+      <div class="action-icon">👥</div>
+      <div class="action-label">Create Team</div>
+    </a>
+
+    <a href="{{ url_for('my_scores') }}" class="action-card">
+      <div class="action-icon">📊</div>
+      <div class="action-label">My Scores</div>
+    </a>
+
+    <a href="{{ url_for('leaderboard') }}" class="action-card">
+      <div class="action-icon">🏆</div>
+      <div class="action-label">Leaderboard</div>
+    </a>
+
+  </div>
+</div>
+
+<h3 class="section-title">My Recent Teams</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Team</th>
+        <th>Event</th>
+        <th>Start</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for team in my_teams %}
+      <tr>
+        <td><strong>{{ team.team_name }}</strong></td>
+        <td>{{ team.event_name }}</td>
+        <td>{{ team.start_time.strftime('%d %b %Y') }}</td>
+        <td>
+          <span class="event-status-badge">{{ team.status|upper }}</span>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" class="text-muted" style="text-align:center;">
+          You have not created or joined any team yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3 class="section-title">All Events</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Status</th>
+        <th>My Team</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td>
+          <strong>{{ e.event_name }}</strong>
+          {% if e.description %}
+            <br>
+            <small class="text-muted">
+              {{ e.description[:80] }}{% if e.description|length > 80 %}...{% endif %}
+            </small>
+          {% endif %}
+        </td>
+
+        <td>{{ e.start_time.strftime('%d %b %Y') }}</td>
+        <td>{{ e.end_time.strftime('%d %b %Y') }}</td>
+
+        <td>
+          <span class="event-status-badge">{{ e.status|upper }}</span>
+        </td>
+
+        <td>
+          {% if e.my_team_name %}
+            <strong>{{ e.my_team_name }}</strong>
+            <br>
+            <small class="text-muted">Registered</small>
+          {% else %}
+            <span class="text-muted">Not registered</span>
+          {% endif %}
+        </td>
+
+        <td>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="{{ url_for('event_detail', event_id=e.event_id) }}" class="btn btn-sm btn-outline">
+  View
+</a>
+
+            {% if e.my_team_name %}
+              <a href="{{ url_for('leaderboard', event_id=e.event_id) }}" class="btn btn-sm btn-outline">
+                Leaderboard
+              </a>
+            {% else %}
+              {% if e.status == 'upcoming' or e.status == 'ongoing' %}
+                <a href="{{ url_for('create_team') }}" class="btn btn-sm btn-primary">
+                  Create Team
+                </a>
+              {% else %}
+                <span class="text-muted">Closed</span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-muted" style="text-align:center;">
+          No events available yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Advisor — {{ event.event_name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{{ url_for('advisor_dashboard') }}" class="back-link">← Back</a>
+  <h2>{{ event.event_name }}</h2>
+  <span class="event-status-badge large">{{ event.status|upper }}</span>
+</div>
+
+<div class="two-col">
+  <div class="col-main">
+    <h3 class="section-title">Live Leaderboard</h3>
+    <div class="table-wrap">
+    <table class="data-table leaderboard-table">
+      <thead><tr><th>Rank</th><th>Team</th><th>Leader</th><th>Solved</th><th>Score</th></tr></thead>
+      <tbody>
+      {% for row in board %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><strong>{{ row.team_name }}</strong></td>
+          <td>{{ row.leader_name }}</td>
+          <td>{{ row.solved }}</td>
+          <td class="score-cell">{{ row.total_score }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty-state">No teams yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="section-title">Send Hint to Team</h3>
+    <div class="form-card">
+      <form method="POST" action="{{ url_for('give_hint') }}">
+        <input type="hidden" name="event_id" value="{{ event.event_id }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Team</label>
+            <select name="team_id" required>
+              <option value="">-- Select Team --</option>
+              {% for t in teams %}<option value="{{ t.team_id }}">{{ t.team_name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Problem</label>
+            <select name="problem_id" required>
+              <option value="">-- Select Problem --</option>
+              {% for p in problems %}<option value="{{ p.problem_id }}">{{ p.title }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Hint Text</label>
+          <textarea name="hint_text" rows="3" placeholder="Write a helpful hint..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Hint</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-side">
+    <div class="side-card">
+      <h4>Teams ({{ teams|length }})</h4>
+      {% for t in teams %}
+        <div class="team-row">
+          <strong>{{ t.team_name }}</strong>
+          <span class="text-muted">{{ t.member_count }} member{{ 's' if t.member_count != 1 }}</span>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="side-card">
+      <h4>Problems</h4>
+      {% for p in problems %}
+        <div class="team-row">
+          <span class="difficulty-badge diff-{{ p.difficulty }}">{{ p.difficulty[0]|upper }}</span>
+          {{ p.title }}
+          <span class="text-muted">({{ p.base_score }}pts)</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

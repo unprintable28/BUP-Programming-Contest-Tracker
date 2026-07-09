@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Submission Monitor{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Submission Monitor</h2>
+  <p class="text-muted">Search and filter all participant submissions.</p>
+</div>
+
+<div class="form-card" style="margin-bottom:24px;">
+  <form method="GET" action="{{ url_for('admin_submissions') }}">
+    <div class="form-group">
+      <label>Search Submission</label>
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search participant, team, event, problem, or output"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Event</label>
+      <select name="event_id">
+        <option value="">All Events</option>
+        {% for e in events %}
+          <option value="{{ e.event_id }}" {% if event_filter == e.event_id %}selected{% endif %}>
+            {{ e.event_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Result</label>
+      <select name="result">
+        <option value="">All Results</option>
+        <option value="correct" {% if result_filter == 'correct' %}selected{% endif %}>Correct</option>
+        <option value="wrong" {% if result_filter == 'wrong' %}selected{% endif %}>Wrong</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <a href="{{ url_for('admin_submissions') }}" class="btn btn-outline">Reset</a>
+  </form>
+</div>
+
+<h3 class="section-title">Submission List</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Participant</th>
+        <th>Team</th>
+        <th>Event</th>
+        <th>Problem</th>
+        <th>Submitted Output</th>
+        <th>Result</th>
+        <th>Score</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for s in submissions %}
+      <tr>
+        <td>{{ s.sub_id }}</td>
+
+        <td>
+          <strong>{{ s.participant_name }}</strong>
+          <br>
+          <small class="text-muted">{{ s.participant_email }}</small>
+        </td>
+
+        <td>{{ s.team_name }}</td>
+        <td>{{ s.event_name }}</td>
+        <td>{{ s.problem_title }}</td>
+
+        <td>
+          <code>{{ s.submitted_output }}</code>
+        </td>
+
+        <td>
+          {% if s.is_correct %}
+            <span class="event-status-badge">CORRECT</span>
+          {% else %}
+            <span class="event-status-badge">WRONG</span>
+          {% endif %}
+        </td>
+
+        <td><strong>{{ s.score_awarded }}</strong></td>
+
+        <td>
+          {% if s.submitted_at %}
+            {{ s.submitted_at.strftime('%d %b %Y, %I:%M %p') }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="text-muted" style="text-align:center;">
+          No submissions found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block title %}Event Details{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('participant_events') }}" class="back-link">← Back to Events</a>
+
+<div class="page-header">
+  <h2>{{ event.event_name }}</h2>
+    <div class="contest-timer-card"
+     data-start="{{ event.start_time.strftime('%Y-%m-%dT%H:%M:%S') }}"
+     data-end="{{ event.end_time.strftime('%Y-%m-%dT%H:%M:%S') }}">
+
+    <div class="timer-row">
+        <span class="timer-label">Contest starts in:</span>
+        <span id="contestStartTimer" class="timer-value">--:--:--</span>
+    </div>
+
+    <div class="timer-row">
+        <span class="timer-label">Contest ends in:</span>
+        <span id="contestEndTimer" class="timer-value">--:--:--</span>
+    </div>
+
+    <div id="contestStatusText" class="contest-status-text"></div>
+</div>
+  <p class="text-muted">{{ event.description }}</p>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number">{{ problems|length }}</div>
+    <div class="stat-label">Problems</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ event.status|upper }}</div>
+    <div class="stat-label">Event Status</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">
+      {% if my_team %}
+        Registered
+      {% else %}
+        Not Joined
+      {% endif %}
+    </div>
+    <div class="stat-label">My Status</div>
+  </div>
+
+  <div class="stat-card stat-green">
+    <div class="stat-number">{{ solved|length }}</div>
+    <div class="stat-label">Solved</div>
+  </div>
+</div>
+
+<div class="quick-actions">
+  <h3 class="section-title">Event Actions</h3>
+
+  <div class="action-grid">
+    <a href="{{ url_for('participant_dashboard') }}" class="action-card">
+      <div class="action-icon">🏠</div>
+      <div class="action-label">Dashboard</div>
+    </a>
+
+    <a href="{{ url_for('leaderboard', event_id=event.event_id) }}" class="action-card">
+      <div class="action-icon">🏆</div>
+      <div class="action-label">Leaderboard</div>
+    </a>
+
+    {% if my_team %}
+      <a href="{{ url_for('my_scores') }}" class="action-card">
+        <div class="action-icon">📊</div>
+        <div class="action-label">My Scores</div>
+      </a>
+    {% else %}
+      <a href="{{ url_for('create_team') }}" class="action-card">
+        <div class="action-icon">👥</div>
+        <div class="action-label">Create Team</div>
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<h3 class="section-title">Event Information</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <tbody>
+      <tr>
+        <th>Start Time</th>
+        <td>{{ event.start_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+      </tr>
+      <tr>
+        <th>End Time</th>
+        <td>{{ event.end_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><span class="event-status-badge">{{ event.status|upper }}</span></td>
+      </tr>
+      <tr>
+        <th>Team Size</th>
+        <td>{{ event.min_team_size }} - {{ event.max_team_size }} members</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 class="section-title">My Team</h3>
+
+{% if my_team %}
+<div class="table-wrap">
+  <table class="data-table">
+    <tbody>
+      <tr>
+        <th>Team Name</th>
+        <td><strong>{{ my_team.team_name }}</strong></td>
+      </tr>
+      <tr>
+        <th>Role</th>
+        <td>
+          {% if my_team.leader_id == session.get('user_id') %}
+            Team Leader
+          {% else %}
+            Team Member
+          {% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 class="section-title">Team Members</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Department</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for member in team_members %}
+      <tr>
+        <td><strong>{{ member.name }}</strong></td>
+        <td>{{ member.email }}</td>
+        <td>{{ member.department }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3" class="text-muted" style="text-align:center;">
+          No team members found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if my_team.leader_id == session.get('user_id') %}
+<h3 class="section-title">Invite Team Member</h3>
+
+<div class="form-card">
+  <form method="POST" action="{{ url_for('invite_member', team_id=my_team.team_id) }}">
+    <div class="form-group">
+      <label>Participant Email</label>
+      <input type="email" name="email" placeholder="member@email.com" required>
+      <small class="text-muted">Only registered participants can be added.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Member</button>
+  </form>
+</div>
+{% endif %}
+
+{% else %}
+<div class="form-card">
+  <p class="text-muted">You have not created or joined a team for this event yet.</p>
+
+  {% if event.status == 'upcoming' or event.status == 'ongoing' %}
+    <a href="{{ url_for('create_team') }}" class="btn btn-primary">Create Team</a>
+  {% else %}
+    <p class="text-muted">Team creation is closed for this event.</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<h3 class="section-title">Problems</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Problem</th>
+        <th>Difficulty</th>
+        <th>Score</th>
+        <th>Status</th>
+        <th>Submit Answer</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for p in problems %}
+      <tr>
+        <td>
+          <strong>{{ p.title }}</strong>
+
+          {% if p.description %}
+            <br>
+            <small class="text-muted">{{ p.description }}</small>
+          {% endif %}
+
+          {% if p.input_format %}
+            <br><br>
+            <strong>Input Format:</strong>
+            <br>
+            <small class="text-muted">{{ p.input_format }}</small>
+          {% endif %}
+
+          {% if p.output_format %}
+            <br><br>
+            <strong>Output Format:</strong>
+            <br>
+            <small class="text-muted">{{ p.output_format }}</small>
+          {% endif %}
+
+          {% if p.sample_input %}
+            <br><br>
+            <strong>Sample Input:</strong>
+            <pre>{{ p.sample_input }}</pre>
+          {% endif %}
+
+          {% if p.sample_output %}
+            <strong>Sample Output:</strong>
+            <pre>{{ p.sample_output }}</pre>
+          {% endif %}
+        </td>
+
+        <td>
+          <span class="event-status-badge">{{ p.difficulty|upper }}</span>
+        </td>
+
+        <td>{{ p.base_score }}</td>
+
+        <td>
+          {% if p.problem_id in solved %}
+            <span class="event-status-badge">SOLVED</span>
+          {% else %}
+            <span class="text-muted">Unsolved</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if not my_team %}
+            <span class="text-muted">Create team first</span>
+
+          {% elif p.problem_id in solved %}
+            <span class="text-muted">Already solved</span>
+
+          {% elif event.status != 'ongoing' %}
+            <span class="text-muted">Submission closed</span>
+
+          {% else %}
+            <form method="POST" action="{{ url_for('submit_solution', problem_id=p.problem_id) }}">
+              <textarea
+                name="output"
+                rows="3"
+                placeholder="Paste final output here..."
+                required
+                style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;"
+              ></textarea>
+
+              <button type="submit" class="btn btn-sm btn-primary" style="margin-top:8px;">
+                Submit
+              </button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-muted" style="text-align:center;">
+          No problems added for this event yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h3 class="section-title">Advisor Hints</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Problem</th>
+        <th>Hint</th>
+        <th>Advisor</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for h in hints %}
+      <tr>
+        <td>{{ h.problem_title }}</td>
+        <td>{{ h.hint_text }}</td>
+        <td>{{ h.advisor_name }}</td>
+        <td>{{ h.created_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="4" class="text-muted" style="text-align:center;">
+          No hints received yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

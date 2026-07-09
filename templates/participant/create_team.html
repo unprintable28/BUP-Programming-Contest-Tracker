@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Create Team{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('participant_dashboard') }}" class="back-link">← Back</a>
+
+<div class="page-header">
+  <h2>Create a Team</h2>
+  <p class="text-muted">Select an event, enter your team name, and create your contest team.</p>
+</div>
+
+<div class="form-card">
+  <form method="POST" action="{{ url_for('create_team') }}">
+
+    <div class="form-group">
+      <label for="event_id">Select Event</label>
+      <select name="event_id" id="event_id" required>
+        <option value="">-- Choose an event --</option>
+
+        {% for event in events %}
+          <option value="{{ event.event_id }}">
+            {{ event.event_name }} | {{ event.status|upper }} | {{ event.start_time.strftime('%d %b %Y') }}
+          </option>
+        {% endfor %}
+      </select>
+
+      {% if not events %}
+        <small class="text-muted">No upcoming or ongoing events available right now.</small>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="team_name">Team Name</label>
+      <input
+        type="text"
+        name="team_name"
+        id="team_name"
+        placeholder="e.g. Code Ninjas"
+        required
+      >
+      <small class="text-muted">
+        You will automatically become the team leader after creating this team.
+      </small>
+    </div>
+
+    <button type="submit" class="btn btn-primary" {% if not events %}disabled{% endif %}>
+      Create Team
+    </button>
+
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Advisor Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Advisor Portal</h2>
+  <p class="text-muted">Monitor contests and support teams.</p>
+</div>
+<div class="event-grid">
+{% for e in events %}
+  <div class="event-card status-{{ e.status }}">
+    <div class="event-card-header">
+      <span class="event-status-badge">{{ e.status|upper }}</span>
+      <h4>{{ e.event_name }}</h4>
+    </div>
+    <div class="event-meta">
+      <div>{{ e.start_time.strftime('%d %b %Y, %H:%M') }} → {{ e.end_time.strftime('%H:%M') }}</div>
+    </div>
+    <div class="event-card-footer">
+      <a href="{{ url_for('advisor_event', event_id=e.event_id) }}" class="btn btn-primary btn-sm">Monitor</a>
+      <a href="{{ url_for('leaderboard', event_id=e.event_id) }}" class="btn btn-sm btn-outline">Leaderboard</a>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Admin Dashboard</h2>
+  <p class="text-muted">Manage events, problems, users, teams, and submissions.</p>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number">{{ participants }}</div>
+    <div class="stat-label">Participants</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ events }}</div>
+    <div class="stat-label">Events</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">{{ teams }}</div>
+    <div class="stat-label">Teams</div>
+  </div>
+
+  <div class="stat-card stat-green">
+    <div class="stat-number">{{ problems }}</div>
+    <div class="stat-label">Problems</div>
+  </div>
+
+  <div class="stat-card stat-orange">
+    <div class="stat-number">{{ submissions }}</div>
+    <div class="stat-label">Total Submissions</div>
+  </div>
+
+  <div class="stat-card stat-green">
+    <div class="stat-number">{{ correct_submissions }}</div>
+    <div class="stat-label">Correct Submissions</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">{{ solved }}</div>
+    <div class="stat-label">Problems Solved</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ total_points }}</div>
+    <div class="stat-label">Total Points</div>
+  </div>
+</div>
+
+<div class="quick-actions">
+  <h3 class="section-title">QUICK ACTIONS</h3>
+
+  <div class="action-grid">
+    <a href="{{ url_for('admin_events') }}" class="action-card">
+      <div class="action-icon">🗓️</div>
+      <div class="action-label">Manage Events</div>
+    </a>
+
+    <a href="{{ url_for('admin_problems') }}" class="action-card">
+      <div class="action-icon">📝</div>
+      <div class="action-label">Manage Problems</div>
+    </a>
+
+    <a href="{{ url_for('admin_users') }}" class="action-card">
+      <div class="action-icon">👥</div>
+      <div class="action-label">Manage Users</div>
+    </a>
+
+    <a href="{{ url_for('leaderboard') }}" class="action-card">
+      <div class="action-icon">🏆</div>
+      <div class="action-label">View Leaderboard</div>
+    </a>
+
+    <a href="{{ url_for('admin_submissions') }}" class="action-card">
+      <div class="action-icon">📥</div>
+      <div class="action-label">Submissions</div>
+    </a>
+  </div>
+</div>
+
+<h3 class="section-title">Recent Events</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for e in recent_events %}
+      <tr>
+        <td><strong>{{ e.event_name }}</strong></td>
+        <td>{{ e.start_time.strftime('%d %b %Y') }}</td>
+        <td>{{ e.end_time.strftime('%d %b %Y') }}</td>
+        <td>
+          <span class="event-status-badge">{{ e.status|upper }}</span>
+        </td>
+        <td>
+          <a href="{{ url_for('leaderboard', event_id=e.event_id) }}" class="btn btn-sm btn-outline">
+            Leaderboard
+          </a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-muted" style="text-align:center;">
+          No events created yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

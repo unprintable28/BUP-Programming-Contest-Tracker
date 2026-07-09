@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2>Leaderboard</h2>
+
+  {% if event %}
+    <p class="text-muted">
+      Ranking for <strong>{{ event.event_name }}</strong>
+    </p>
+  {% else %}
+    <p class="text-muted">No event selected.</p>
+  {% endif %}
+</div>
+
+<div class="form-card" style="margin-bottom: 24px;">
+  <form method="GET" action="{{ url_for('leaderboard') }}">
+    <div class="form-group">
+      <label>Select Event</label>
+      <select name="event_id" onchange="this.form.submit()">
+        {% for e in events %}
+          <option value="{{ e.event_id }}" {% if event and e.event_id == event.event_id %}selected{% endif %}>
+            {{ e.event_name }} | {{ e.status|upper }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+{% if event %}
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-number">{{ total_teams }}</div>
+    <div class="stat-label">Teams</div>
+  </div>
+
+  <div class="stat-card stat-blue">
+    <div class="stat-number">{{ total_problems }}</div>
+    <div class="stat-label">Problems</div>
+  </div>
+
+  <div class="stat-card stat-purple">
+    <div class="stat-number">{{ top_score }}</div>
+    <div class="stat-label">Top Score</div>
+  </div>
+
+  <div class="stat-card stat-green">
+    <div class="stat-number">{{ event.status|upper }}</div>
+    <div class="stat-label">Event Status</div>
+  </div>
+</div>
+
+<h3 class="section-title">Team Rankings</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Team</th>
+        <th>Leader</th>
+        <th>Members</th>
+        <th>Solved</th>
+        <th>Total Score</th>
+        <th>Submissions</th>
+        <th>Wrong Attempts</th>
+        <th>First Solve</th>
+        <th>Last Solve</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for row in board %}
+      <tr>
+        <td>
+          {% if loop.index == 1 %}
+            🥇 <strong>#{{ loop.index }}</strong>
+          {% elif loop.index == 2 %}
+            🥈 <strong>#{{ loop.index }}</strong>
+          {% elif loop.index == 3 %}
+            🥉 <strong>#{{ loop.index }}</strong>
+          {% else %}
+            <strong>#{{ loop.index }}</strong>
+          {% endif %}
+        </td>
+
+        <td>
+          <strong>{{ row.team_name }}</strong>
+        </td>
+
+        <td>
+          {{ row.leader_name }}
+          <br>
+          <small class="text-muted">{{ row.leader_email }}</small>
+        </td>
+
+        <td>{{ row.member_count }}</td>
+
+        <td>
+          <strong>{{ row.solved }}</strong> / {{ total_problems }}
+        </td>
+
+        <td>
+          <strong>{{ row.total_score }}</strong>
+        </td>
+
+        <td>{{ row.total_submissions }}</td>
+
+        <td>{{ row.wrong_attempts }}</td>
+
+        <td>
+          {% if row.first_solve_time %}
+            {{ row.first_solve_time.strftime('%d %b %Y, %I:%M %p') }}
+          {% else %}
+            <span class="text-muted">No solve yet</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if row.last_solve_time %}
+            {{ row.last_solve_time.strftime('%d %b %Y, %I:%M %p') }}
+          {% else %}
+            <span class="text-muted">No solve yet</span>
+          {% endif %}
+        </td>
+      </tr>
+
+      {% else %}
+      <tr>
+        <td colspan="10" class="text-muted" style="text-align:center;">
+          No teams found for this event yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+
+<div class="form-card">
+  <p class="text-muted">No events available for leaderboard.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Manage Events{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Manage Events</h2>
+  <p class="text-muted">Create contests and update event status.</p>
+</div>
+
+<div class="form-card">
+  <h3 class="section-title">Create New Event</h3>
+
+  <form method="POST" action="{{ url_for('admin_events') }}">
+    <div class="form-group">
+      <label>Event Name</label>
+      <input type="text" name="event_name" placeholder="e.g. BUP Programming Contest 2026" required>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea name="description" rows="3" placeholder="Short event description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Start Time</label>
+      <input type="datetime-local" name="start_time" required>
+    </div>
+
+    <div class="form-group">
+      <label>End Time</label>
+      <input type="datetime-local" name="end_time" required>
+    </div>
+
+    <div class="form-group">
+      <label>Minimum Team Size</label>
+      <input type="number" name="min_team_size" value="1" min="1" required>
+    </div>
+
+    <div class="form-group">
+      <label>Maximum Team Size</label>
+      <input type="number" name="max_team_size" value="3" min="1" required>
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status" required>
+        <option value="upcoming">Upcoming</option>
+        <option value="ongoing">Ongoing</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Event</button>
+  </form>
+</div>
+
+<div class="form-card" style="margin-bottom:24px;">
+  <form method="GET" action="{{ url_for('admin_events') }}">
+    <div class="form-group">
+      <label>Search Event</label>
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search by event name or description"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All Status</option>
+        <option value="upcoming" {% if status_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+        <option value="ongoing" {% if status_filter == 'ongoing' %}selected{% endif %}>Ongoing</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <a href="{{ url_for('admin_events') }}" class="btn btn-outline">Reset</a>
+  </form>
+</div>
+
+<h3 class="section-title">Event List</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Team Size</th>
+        <th>Status</th>
+        <th>Update Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td>
+          <strong>{{ e.event_name }}</strong>
+          {% if e.description %}
+            <br>
+            <small class="text-muted">{{ e.description[:80] }}{% if e.description|length > 80 %}...{% endif %}</small>
+          {% endif %}
+        </td>
+
+        <td>{{ e.start_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+        <td>{{ e.end_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+        <td>{{ e.min_team_size }} - {{ e.max_team_size }}</td>
+
+        <td>
+          <span class="event-status-badge">{{ e.status|upper }}</span>
+        </td>
+
+        <td>
+          <form method="POST" action="{{ url_for('update_event_status', event_id=e.event_id) }}">
+            <select name="status" required>
+              <option value="upcoming" {% if e.status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+              <option value="ongoing" {% if e.status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+              <option value="completed" {% if e.status == 'completed' %}selected{% endif %}>Completed</option>
+              <option value="cancelled" {% if e.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+
+            <button type="submit" class="btn btn-sm btn-outline">Update</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-muted" style="text-align:center;">
+          No events created yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

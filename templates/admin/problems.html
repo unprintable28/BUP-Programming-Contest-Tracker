@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Manage Problems{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Manage Problems</h2>
+  <p class="text-muted">Add problems under events and define correct outputs.</p>
+</div>
+
+<div class="form-card">
+  <h3 class="section-title">Add New Problem</h3>
+
+  <form method="POST" action="{{ url_for('admin_problems') }}">
+    <div class="form-group">
+      <label>Select Event</label>
+      <select name="event_id" required>
+        <option value="">-- Choose Event --</option>
+        {% for e in events %}
+          <option value="{{ e.event_id }}">{{ e.event_name }} | {{ e.status|upper }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Problem Title</label>
+      <input type="text" name="title" placeholder="e.g. Sum of Two Numbers" required>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea name="description" rows="4" placeholder="Write the full problem statement"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Difficulty</label>
+      <select name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Input Format</label>
+      <textarea name="input_format" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Output Format</label>
+      <textarea name="output_format" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Sample Input</label>
+      <textarea name="sample_input" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Sample Output</label>
+      <textarea name="sample_output" rows="2"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Correct Output</label>
+      <textarea name="correct_output" rows="2" required></textarea>
+      <small class="text-muted">Participant output will be compared with this value.</small>
+    </div>
+
+    <div class="form-group">
+      <label>Base Score</label>
+      <input type="number" name="base_score" value="100" min="1">
+    </div>
+
+    <div class="form-group">
+      <label>Minimum Score</label>
+      <input type="number" name="min_score" value="20" min="0">
+    </div>
+
+    <div class="form-group">
+      <label>Decay Interval</label>
+      <input type="number" name="decay_interval" value="10" min="1">
+    </div>
+
+    <div class="form-group">
+      <label>Decay Amount</label>
+      <input type="number" name="decay_amount" value="5" min="0">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Problem</button>
+  </form>
+</div>
+
+
+<div class="form-card" style="margin-bottom:24px;">
+  <form method="GET" action="{{ url_for('admin_problems') }}">
+    <div class="form-group">
+      <label>Search Problem</label>
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search by title, description, or correct output"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>Event</label>
+      <select name="event_id">
+        <option value="">All Events</option>
+        {% for e in events %}
+          <option value="{{ e.event_id }}" {% if event_filter == e.event_id %}selected{% endif %}>
+            {{ e.event_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Difficulty</label>
+      <select name="difficulty">
+        <option value="">All Difficulty</option>
+        <option value="easy" {% if difficulty_filter == 'easy' %}selected{% endif %}>Easy</option>
+        <option value="medium" {% if difficulty_filter == 'medium' %}selected{% endif %}>Medium</option>
+        <option value="hard" {% if difficulty_filter == 'hard' %}selected{% endif %}>Hard</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <a href="{{ url_for('admin_problems') }}" class="btn btn-outline">Reset</a>
+  </form>
+</div>
+
+
+<h3 class="section-title">Problem List</h3>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Problem</th>
+        <th>Event</th>
+        <th>Difficulty</th>
+        <th>Base Score</th>
+        <th>Correct Output</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for p in problems %}
+      <tr>
+        <td>
+          <strong>{{ p.title }}</strong>
+          {% if p.description %}
+            <br>
+            <small class="text-muted">{{ p.description[:100] }}{% if p.description|length > 100 %}...{% endif %}</small>
+          {% endif %}
+        </td>
+
+        <td>{{ p.event_name }}</td>
+        <td><span class="event-status-badge">{{ p.difficulty|upper }}</span></td>
+        <td>{{ p.base_score }}</td>
+        <td><code>{{ p.correct_output }}</code></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5" class="text-muted" style="text-align:center;">
+          No problems added yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
